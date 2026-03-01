@@ -62,8 +62,13 @@ EOF
     else
         while read -r proto port; do
             [ -z "$proto" ] || [ -z "$port" ] && continue
-            # 注入防御装甲：单IP最大并发100，5秒内新建连接超过50次即触发 overload 自动加入黑名单，并强制 flush 掐断所有连接
-            echo "pass in quick inet proto $proto from any to any port $port keep state (max-src-conn 100, max-src-conn-rate 50/5, overload <blacklist> flush global)" >> "$PF_CONF"
+            
+            # 核心修复：区分 TCP 和 UDP 的状态追踪参数
+            if [ "$proto" = "tcp" ]; then
+                echo "pass in quick inet proto tcp from any to any port $port keep state (max-src-conn 100, max-src-conn-rate 50/5, overload <blacklist> flush global)" >> "$PF_CONF"
+            elif [ "$proto" = "udp" ]; then
+                echo "pass in quick inet proto udp from any to any port $port keep state (max-src-states 100, max-src-conn-rate 50/5, overload <blacklist> flush global)" >> "$PF_CONF"
+            fi
         done < "$STATE_FILE"
     fi
 
@@ -183,4 +188,3 @@ while true; do
         *) echo "无效选项。" ;;
     esac
 done
-
