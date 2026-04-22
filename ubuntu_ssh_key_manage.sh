@@ -32,13 +32,37 @@ restart_ssh() {
 # 开启密钥登录模式并关闭密码登录
 sshkey_on() {
     local sshd_config="/etc/ssh/sshd_config"
+    
+    # 1. 先处理配置文件中通常已有的项
     sed -i -e 's/^\s*#\?\s*PermitRootLogin .*/PermitRootLogin prohibit-password/' \
            -e 's/^\s*#\?\s*PasswordAuthentication .*/PasswordAuthentication no/' \
            -e 's/^\s*#\?\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' \
-           -e 's/^\s*#\?\s*ChallengeResponseAuthentication .*/ChallengeResponseAuthentication no/' "$sshd_config"
+           -e 's/^\s*#\?\s*ChallengeResponseAuthentication .*/ChallengeResponseAuthentication no/' \
+           -e 's/^\s*#\?\s*KbdInteractiveAuthentication .*/KbdInteractiveAuthentication no/' \
+           -e 's/^\s*#\?\s*UsePAM .*/UsePAM no/' "$sshd_config"
+
+    # 2. 查缺补漏：如果文件中没有这些关键项，则追加到末尾，确保配置不重复
+    local configs=(
+        "PermitRootLogin prohibit-password"
+        "PasswordAuthentication no"
+        "PubkeyAuthentication yes"
+        "ChallengeResponseAuthentication no"
+        "KbdInteractiveAuthentication no"
+        "UsePAM no"
+    )
+
+    for entry in "${configs[@]}"; do
+        local key="${entry%% *}"
+        if ! grep -qi "^\s*$key" "$sshd_config"; then
+            echo "$entry" >> "$sshd_config"
+        fi
+    done
+
+    # 3. 清理干扰目录
     rm -rf /etc/ssh/sshd_config.d/* /etc/ssh/ssh_config.d/*
+    
     restart_ssh
-    echo -e "${gl_lv}用户密钥登录模式已开启，已关闭密码登录模式，重连将会生效${gl_bai}"
+    echo -e "${gl_lv}用户密钥登录模式已开启，已禁用密码、PAM 及键盘交互认证，重连生效${gl_bai}"
 }
 
 # 生成新密钥对
@@ -81,6 +105,7 @@ sshkey_panel() {
     root_use
     while true; do
         clear
+        # 获取当前实际状态用于显示
         local REAL_STATUS=$(grep -i "^PubkeyAuthentication" /etc/ssh/sshd_config | awk '{print $2}' | tr '[:upper:]' '[:lower:]')
         IS_KEY_ENABLED="${gl_hui}未启用${gl_bai}"
         [[ "$REAL_STATUS" == "yes" ]] && IS_KEY_ENABLED="${gl_lv}已启用${gl_bai}"
@@ -116,4 +141,3 @@ sshkey_panel() {
 }
 
 sshkey_panel
-
