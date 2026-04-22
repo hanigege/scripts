@@ -1,6 +1,6 @@
 #!/bin/ash
 
-# 强制定义路径，防止环境变量缺失
+# 强制定义路径
 HOME="/root"
 
 # 颜色定义
@@ -33,30 +33,49 @@ restart_ssh() {
     rc-service sshd restart >/dev/null 2>&1
 }
 
-# 开启密钥模式
+# 开启密钥模式 (核心逻辑：查缺补漏，防止重复)
 sshkey_on() {
     local conf="/etc/ssh/sshd_config"
-    # 备份原始配置
     [ ! -f "${conf}.bak" ] && cp "$conf" "${conf}.bak"
     
-    # 核心配置修改
-    sed -i 's/^\s*#\?\s*PermitRootLogin .*/PermitRootLogin prohibit-password/' "$conf"
-    sed -i 's/^\s*#\?\s*PasswordAuthentication .*/PasswordAuthentication no/' "$conf"
-    sed -i 's/^\s*#\?\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' "$conf"
-    sed -i 's/^\s*#\?\s*ChallengeResponseAuthentication .*/ChallengeResponseAuthentication no/' "$conf"
-    
-    # 注释掉 Alpine 默认的 Include 指令，防止子配置干扰
+    # 定义核心配置项
+    configs="
+PermitRootLogin prohibit-password
+PasswordAuthentication no
+PubkeyAuthentication yes
+ChallengeResponseAuthentication no
+KbdInteractiveAuthentication no
+UsePAM no
+"
+
+    # 1. 尝试修改已有项（包含被注释的行）
+    echo "$configs" | while read -r line; do
+        [ -z "$line" ] && continue
+        key=$(echo "$line" | awk '{print $1}')
+        val=$(echo "$line" | awk '{print $2}')
+        # 匹配任何以该 key 开头的行（无论前面是否有 # 或空格）并替换
+        sed -i "s|^\s*#\?\s*$key\s.*|$key $val|g" "$conf"
+    done
+
+    # 2. 查缺补漏：如果文件中完全没出现过该 key，则追加
+    echo "$configs" | while read -r line; do
+        [ -z "$line" ] && continue
+        key=$(echo "$line" | awk '{print $1}')
+        if ! grep -qi "^\s*$key\s" "$conf"; then
+            echo "$line" >> "$conf"
+        fi
+    done
+
+    # 3. 处理 Alpine 特有配置：注释掉 Include 指令，清理子配置
     sed -i 's/^Include /#Include /g' "$conf"
-    
-    # 清理子配置目录
     [ -d /etc/ssh/sshd_config.d ] && rm -f /etc/ssh/sshd_config.d/*
     
     restart_ssh
-    echo -e "${gl_lv}SSH 配置已刷新，密钥模式已生效${gl_bai}"
+    echo -e "${gl_lv}SSH 安全配置已查缺补漏并强制刷新，密钥模式已生效${gl_bai}"
     sleep 2
 }
 
-# 确保目录存在
+# 确保目录权限正确
 ensure_ssh_dir() {
     [ ! -d "$HOME/.ssh" ] && mkdir -p "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
@@ -74,34 +93,23 @@ add_sshkey() {
     
     ip_address
     echo -e "\n${gl_lv}密钥对生成成功！${gl_bai}"
-    echo -e "请务必保存私钥，文件名建议为: ${gl_huang}${ipv4_address}_ssh.key${gl_bai}"
+    echo -e "请保存私钥，建议文件名: ${gl_huang}${ipv4_address}_ssh.key${gl_bai}"
     echo "------------------------------------------------"
     cat "$key_path"
     echo "------------------------------------------------"
     sshkey_on
 }
 
-# 2. 手动输入导入
+# 2. 手动导入公钥
 import_sshkey() {
     ensure_ssh_dir
-    printf "${gl_hui}请粘贴公钥内容 (ssh-rsa/ssh-ed25519...): ${gl_bai}"
+    printf "${gl_hui}请粘贴公钥内容: ${gl_bai}"
     read pub_content
-    
     if [ -z "$pub_content" ]; then
-        echo -e "${gl_hong}错误：输入内容为空${gl_bai}"
-        return 1
+        echo -e "${gl_hong}错误：输入内容为空${gl_bai}"; return 1
     fi
-
     echo "$pub_content" >> "$HOME/.ssh/authorized_keys"
-    
-    # 校验写入是否成功
-    if grep -qF "$pub_content" "$HOME/.ssh/authorized_keys"; then
-        echo -e "${gl_lv}导入成功！${gl_bai}"
-        sshkey_on
-    else
-        echo -e "${gl_hong}写入失败，请检查磁盘空间或权限${gl_bai}"
-        sleep 2
-    fi
+    sshkey_on
 }
 
 # 3. 从 GitHub 导入
@@ -111,7 +119,7 @@ import_github() {
     read username
     if [ -n "$username" ]; then
         curl -fsSL "https://github.com/${username}.keys" >> "$HOME/.ssh/authorized_keys"
-        echo -e "${gl_lv}GitHub 公钥已尝试导入${gl_bai}"
+        echo -e "${gl_lv}GitHub 公钥导入尝试完成${gl_bai}"
         sshkey_on
     fi
 }
@@ -142,17 +150,11 @@ sshkey_panel() {
             3) import_github ;;
             4) nano "$HOME/.ssh/authorized_keys" ;;
             5)
-                echo -e "\n${gl_huang}--- 已授权公钥 (authorized_keys) ---${gl_bai}"
-                if [ -s "$HOME/.ssh/authorized_keys" ]; then
-                    cat "$HOME/.ssh/authorized_keys"
-                else
-                    echo "文件为空"
-                fi
-                echo -e "\n${gl_huang}--- 本地生成的私钥 (如有) ---${gl_bai}"
-                [ -f "$HOME/.ssh/sshkey" ] && cat "$HOME/.ssh/sshkey" || echo "未找到通过本脚本生成的私钥"
-                echo "------------------------------------------------"
-                printf "按回车继续..."
-                read dummy ;;
+                echo -e "\n${gl_huang}--- 已授权公钥 ---${gl_bai}"
+                [ -s "$HOME/.ssh/authorized_keys" ] && cat "$HOME/.ssh/authorized_keys" || echo "为空"
+                echo -e "\n${gl_huang}--- 本地私钥 (如有) ---${gl_bai}"
+                [ -f "$HOME/.ssh/sshkey" ] && cat "$HOME/.ssh/sshkey" || echo "未找到"
+                printf "\n按回车继续..."; read dummy ;;
             0) exit 0 ;;
             *) echo "无效选择"; sleep 1 ;;
         esac
@@ -160,4 +162,3 @@ sshkey_panel() {
 }
 
 sshkey_panel
-
