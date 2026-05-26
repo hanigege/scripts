@@ -1,8 +1,8 @@
 # hanigege/scripts
 
-常用服务器运维脚本集合，覆盖 SSH 密钥登录、Linux iptables 防火墙、FreeBSD PF 防火墙、SSL 证书申请和 Docker 配置安装等场景。
+常用服务器运维脚本集合，覆盖 SSH 密钥登录、Alpine/Debian/Ubuntu iptables 防火墙、FreeBSD PF 防火墙、SSL 证书申请和 Docker 配置安装等场景。
 
-Most scripts are interactive server operation helpers for SSH key login, Linux iptables, FreeBSD PF, SSL certificate issuing, and Docker configuration.
+Most scripts are interactive server operation helpers for SSH key login, Alpine/Debian/Ubuntu iptables, FreeBSD PF, SSL certificate issuing, and Docker configuration.
 
 ## 使用前请注意
 
@@ -71,6 +71,16 @@ fetch -o /tmp/freebsd_user_ssh_manager.sh https://raw.githubusercontent.com/hani
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/iptables_manager.sh -o /tmp/iptables_manager.sh && chmod +x /tmp/iptables_manager.sh && sudo /tmp/iptables_manager.sh
+```
+
+### Alpine iptables 防火墙管理
+
+文件：[`alpine_iptables_manager.sh`](./alpine_iptables_manager.sh)
+
+适用于 Alpine Linux 的交互式 iptables 管理工具。支持查看规则、放行端口、屏蔽 IP/CIDR、删除规则、持久化保存、仅保留 SSH 的防火墙加固，以及紧急恢复全开放。脚本会使用 Alpine 的 OpenRC `iptables`/`ip6tables` 服务保存规则。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/alpine_iptables_manager.sh -o /tmp/alpine_iptables_manager.sh && chmod +x /tmp/alpine_iptables_manager.sh && /tmp/alpine_iptables_manager.sh
 ```
 
 ### FreeBSD PF 防火墙管理
@@ -163,6 +173,16 @@ Interactive iptables manager for Debian/Ubuntu. It can view rules, open ports, b
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/iptables_manager.sh -o /tmp/iptables_manager.sh && chmod +x /tmp/iptables_manager.sh && sudo /tmp/iptables_manager.sh
+```
+
+### Alpine iptables manager
+
+File: [`alpine_iptables_manager.sh`](./alpine_iptables_manager.sh)
+
+Interactive iptables manager for Alpine Linux. It can view rules, open ports, block IP/CIDR ranges, delete rules, persist rules, apply an SSH-preserving hardened baseline, and reset the firewall to an open emergency mode. Rules are saved through Alpine's OpenRC `iptables`/`ip6tables` services.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/alpine_iptables_manager.sh -o /tmp/alpine_iptables_manager.sh && chmod +x /tmp/alpine_iptables_manager.sh && /tmp/alpine_iptables_manager.sh
 ```
 
 ### FreeBSD PF firewall manager

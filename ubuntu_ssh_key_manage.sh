@@ -125,7 +125,11 @@ sshkey_panel() {
             2) import_sshkey ;;
             3) 
                 read -e -p "请输入 GitHub 用户名: " username
+                mkdir -p "${HOME}/.ssh"
+                chmod 700 "${HOME}/.ssh"
+                touch "${HOME}/.ssh/authorized_keys"
                 curl -fsSL "https://github.com/${username}.keys" >> "${HOME}/.ssh/authorized_keys"
+                chmod 600 "${HOME}/.ssh/authorized_keys"
                 sshkey_on ;;
             4) nano "${HOME}/.ssh/authorized_keys" ;;
             5)
