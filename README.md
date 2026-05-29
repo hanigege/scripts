@@ -83,6 +83,16 @@ curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/iptables_mana
 curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/alpine_iptables_manager.sh -o /tmp/alpine_iptables_manager.sh && chmod +x /tmp/alpine_iptables_manager.sh && /tmp/alpine_iptables_manager.sh
 ```
 
+### Alpine IPv4 防火墙加固备份脚本
+
+文件：[`Alpine_firewall.sh`](./Alpine_firewall.sh)
+
+适用于 Alpine Linux 的 IPv4 防火墙加固备份脚本。会安装 `iptables` 与 OpenRC 服务组件，重置规则后放行 SSH、HTTP、HTTPS、`8000`、`10521` 等 TCP 端口，以及 UDP `443`。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/Alpine_firewall.sh -o /tmp/Alpine_firewall.sh && chmod +x /tmp/Alpine_firewall.sh && /tmp/Alpine_firewall.sh
+```
+
 ### FreeBSD PF 防火墙管理
 
 文件：[`pf_manager.sh`](./pf_manager.sh)
@@ -101,6 +111,16 @@ fetch -o /root/pf-manager.sh https://raw.githubusercontent.com/hanigege/scripts/
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl.sh -o /tmp/ssl.sh && chmod +x /tmp/ssl.sh && sudo /tmp/ssl.sh
+```
+
+### Alpine SSL 证书申请备份脚本
+
+文件：[`ssl_alpine.sh`](./ssl_alpine.sh)
+
+适用于 Alpine Linux 的 Let's Encrypt 证书申请备份脚本。使用 `acme.sh` standalone 模式申请证书，证书默认安装到 `/etc/ssl/<domain>/`，并通过 OpenRC 处理 `nginx` 停止、启动和重载。
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl_alpine.sh -o /tmp/ssl_alpine.sh && chmod +x /tmp/ssl_alpine.sh && /tmp/ssl_alpine.sh
 ```
 
 ### Docker 配置安装包
@@ -185,6 +205,16 @@ Interactive iptables manager for Alpine Linux. It can view rules, open ports, bl
 curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/alpine_iptables_manager.sh -o /tmp/alpine_iptables_manager.sh && chmod +x /tmp/alpine_iptables_manager.sh && /tmp/alpine_iptables_manager.sh
 ```
 
+### Alpine IPv4 firewall hardening backup
+
+File: [`Alpine_firewall.sh`](./Alpine_firewall.sh)
+
+Alpine Linux IPv4 firewall hardening backup script. It installs `iptables` and OpenRC service support, resets rules, then allows SSH, HTTP, HTTPS, TCP `8000`, TCP `10521`, and UDP `443`.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/Alpine_firewall.sh -o /tmp/Alpine_firewall.sh && chmod +x /tmp/Alpine_firewall.sh && /tmp/Alpine_firewall.sh
+```
+
 ### FreeBSD PF firewall manager
 
 File: [`pf_manager.sh`](./pf_manager.sh)
@@ -203,6 +233,16 @@ Let's Encrypt certificate helper for Debian/Ubuntu/CentOS/RHEL. It uses `acme.sh
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl.sh -o /tmp/ssl.sh && chmod +x /tmp/ssl.sh && sudo /tmp/ssl.sh
+```
+
+### Alpine SSL certificate issuer backup
+
+File: [`ssl_alpine.sh`](./ssl_alpine.sh)
+
+Alpine Linux Let's Encrypt certificate helper backup script. It uses `acme.sh` standalone mode, installs certificates under `/etc/ssl/<domain>/`, and uses OpenRC hooks for stopping, starting, and reloading `nginx`.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl_alpine.sh -o /tmp/ssl_alpine.sh && chmod +x /tmp/ssl_alpine.sh && /tmp/ssl_alpine.sh
 ```
 
 ### Docker configuration installer
