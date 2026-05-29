@@ -120,7 +120,7 @@ curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl.sh -o /tm
 适用于 Alpine Linux 的 Let's Encrypt 证书申请备份脚本。使用 `acme.sh` standalone 模式申请证书，证书默认安装到 `/etc/ssl/<domain>/`，并通过 OpenRC 处理 `nginx` 停止、启动和重载。
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl_alpine.sh -o /tmp/ssl_alpine.sh && chmod +x /tmp/ssl_alpine.sh && /tmp/ssl_alpine.sh
+apk add --no-cache bash curl && curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl_alpine.sh -o /tmp/ssl_alpine.sh && chmod +x /tmp/ssl_alpine.sh && bash /tmp/ssl_alpine.sh
 ```
 
 ### Docker 配置安装包
@@ -242,7 +242,7 @@ File: [`ssl_alpine.sh`](./ssl_alpine.sh)
 Alpine Linux Let's Encrypt certificate helper backup script. It uses `acme.sh` standalone mode, installs certificates under `/etc/ssl/<domain>/`, and uses OpenRC hooks for stopping, starting, and reloading `nginx`.
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl_alpine.sh -o /tmp/ssl_alpine.sh && chmod +x /tmp/ssl_alpine.sh && /tmp/ssl_alpine.sh
+apk add --no-cache bash curl && curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/ssl_alpine.sh -o /tmp/ssl_alpine.sh && chmod +x /tmp/ssl_alpine.sh && bash /tmp/ssl_alpine.sh
 ```
 
 ### Docker configuration installer

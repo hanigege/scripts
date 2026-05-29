@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # 一键申请 SSL 证书脚本 (默认使用 Let's Encrypt) - 针对 Alpine Linux
 #
