@@ -103,7 +103,7 @@ curl -fsSL https://raw.githubusercontent.com/hanigege/scripts/main/Alpine_firewa
 fetch -o /root/pf-manager.sh https://raw.githubusercontent.com/hanigege/scripts/main/pf_manager.sh && chmod 700 /root/pf-manager.sh && /root/pf-manager.sh
 ```
 
-### SSL 证书申请
+### Debian/Ubuntu SSL 证书申请
 
 文件：[`ssl.sh`](./ssl.sh)
 
@@ -225,7 +225,7 @@ Interactive PF firewall manager for FreeBSD. It keeps the current SSH TCP port o
 fetch -o /root/pf-manager.sh https://raw.githubusercontent.com/hanigege/scripts/main/pf_manager.sh && chmod 700 /root/pf-manager.sh && /root/pf-manager.sh
 ```
 
-### SSL certificate issuer
+### Debian/Ubuntu SSL certificate issuer
 
 File: [`ssl.sh`](./ssl.sh)
 
